@@ -99,7 +99,7 @@ print "Picking OTU representative sequences...\n";
 `pick_rep_set.py -i uclust_picked_otus/normalised_otus.txt -f normalised.fa`;
 
 print "Assigning taxonomy...\n";
-`assign_taxonomy.py -i normalised.fa_rep_set.fasta -t /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/taxonomies/otu_id_to_greengenes.txt -r /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/rep_set/gg_97_otus_6oct2010.fasta -m blast`;
+`assign_taxonomy.py -i normalised.fa_rep_set.fasta -t /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/taxonomies/otu_id_to_greengenes.txt -r /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/rep_set/gg_97_otus_6oct2010.fasta -m blast -e 1e-50`;
 
 #print "Treeing...\n";
 #`align_seqs.py -i normalised.fa_rep_set.fasta -t /srv/whitlam/bio/db/gg/qiime_default/core_set_aligned.fasta.imputed -p 0.6`;
@@ -142,7 +142,7 @@ print "Summarizing by taxa.....\n";
 
 print "Generating Genus-level heat map.....\n";
 `getColors.pl $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/color_file.txt`;
-`R --vanilla --slave --args $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R`;
+`R --vanilla --slave --args $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R > R.stdout`;
 
 
 print "Tidy up...\n";
