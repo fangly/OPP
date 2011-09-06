@@ -107,7 +107,28 @@ print "Assigning taxonomy...\n";
 #`make_phylogeny.py -i normalised.fa_rep_set_aligned_pfiltered.fasta -r midpoint`;
 
 print "Making OTU table...\n";
-`make_otu_table.py -i uclust_picked_otus/normalised_otus.txt -t blast_assigned_taxonomy/normalised.fa_rep_set_tax_assignments.txt -o otu_table.txt`;
+`make_otu_table.py -i uclust_picked_otus/normalised_otus.txt -t blast_assigned_taxonomy/normalised.fa_rep_set_tax_assignments.txt -o $global_working_dir/results/otu_table.txt`;
+
+
+print "Rarefaction and diversity...\n";
+#`multiple_rarefactions.py -i otu_table.txt -o rarefied_otu_tables/ -m $global_rare_M -x $global_rare_X -s $global_rare_S -n $global_rare_N`;
+#`alpha_diversity.py -i rarefied_otu_tables/ -o rarefied_alpha/ -m chao1,chao1_confidence,observed_species,simpson,shannon`;
+#`collate_alpha.py -i rarefied_alpha/ -o $global_working_dir/results/alpha_diversity/`;
+# find step size for rarefaction
+`per_library_stats.py -i otu_table.txt -o $global_working_dir/results/otu_table_stats.txt`;
+#need to grep for params
+my $min_seqs=0;
+my $max_seqs=400;
+my $num_steps=10;
+my $step_size=($max_seqs-$min_seqs)/$num_steps;
+`multiple_rarefactions.py -i $global_working_dir/results/otu_table.txt  -o $global_working_dir/results/alpha_rare/rarefaction -m $min_seqs -x $max_seqs -n $num_steps -s $step_size`;
+`alpha_diversity.py -i $global_working_dir/results/alpha_rare/rarefaction/ -o $global_working_dir/results/alpha_rare/alpha_div/ -m observed_species,shannon`;
+`collate_alpha.py -i $global_working_dir/results/alpha_rare/alpha_div/ -o $global_working_dir/results/alpha_rare/alpha_div_collated/`;
+
+# Rarefaction plot: All metrics command
+`make_rarefaction_plots.py -i $global_working_dir/results/alpha_rare/alpha_div_collated/ -m $global_working_dir/QA/qiime_mapping.txt -o $global_working_dir/results/alpha_rare/alpha_rarefaction_plots/ --background_color white --resolution 75 --imagetype svg`;
+#`beta_diversity.py -i otu_table.txt -t normalised.fa_rep_set_aligned_pfiltered.tre -m weighted_unifrac,unweighted_unifrac -o $global_working_dir/results/beta_diversity`;
+
 
 print "Normalizing otu table...\n";
 if(0 <= $global_norm){
@@ -123,25 +144,6 @@ print "Generating Genus-level heat map.....\n";
 `getColors.pl $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/color_file.txt`;
 `R --vanilla --slave --args $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R`;
 
-
-print "Rarefaction and diversity...\n";
-#`multiple_rarefactions.py -i otu_table.txt -o rarefied_otu_tables/ -m $global_rare_M -x $global_rare_X -s $global_rare_S -n $global_rare_N`;
-#`alpha_diversity.py -i rarefied_otu_tables/ -o rarefied_alpha/ -m chao1,chao1_confidence,observed_species,simpson,shannon`;
-#`collate_alpha.py -i rarefied_alpha/ -o $global_working_dir/results/alpha_diversity/`;
-# find step size for rarefaction
-`per_library_stats.py -i otu_table.txt -o $global_working_dir/results/otu_table_stats.txt`;
-#need to grep for params
-my $min_seqs=0;
-my $max_seqs=400;
-my $num_steps=10;
-my $step_size=($max_seqs-$min_seqs)/$num_steps;
-`multiple_rarefactions.py -i otu_table.txt  -o $global_working_dir/results/alpha_rare/rarefaction -m $min_seqs -x $max_seqs -n $num_steps -s $step_size`;
-`alpha_diversity.py -i $global_working_dir/results/alpha_rare/rarefaction/ -o $global_working_dir/results/alpha_rare/alpha_div/ -m observed_species,shannon`;
-`collate_alpha.py -i $global_working_dir/results/alpha_rare/alpha_div/ -o $global_working_dir/results/alpha_rare/alpha_div_collated/`;
-
-# Rarefaction plot: All metrics command
-`make_rarefaction_plots.py -i $global_working_dir/results/alpha_rare/alpha_div_collated/ -m $global_working_dir/QA/qiime_mapping.txt -o $global_working_dir/results/alpha_rare/alpha_rarefaction_plots/ --background_color white --resolution 75 --imagetype svg`;
-#`beta_diversity.py -i otu_table.txt -t normalised.fa_rep_set_aligned_pfiltered.tre -m weighted_unifrac,unweighted_unifrac -o $global_working_dir/results/beta_diversity`;
 
 print "Tidy up...\n";
 `cp otu_table.txt $global_working_dir/results/`;
