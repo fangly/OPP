@@ -57,10 +57,6 @@ my $global_working_dir = "~";
 my $global_conf_base = basename($options->{'config'});
 my %global_samp_ID_list = ();
 my $global_norm = 0;
-my $global_rare_M = 10;
-my $global_rare_X = 100;
-my $global_rare_S = 10;
-my $global_rare_N = 10;
 
 print "Checking if all the config checks out...\t\t";
 
@@ -198,8 +194,7 @@ sub parse_config_results
     # parse the app config file and produce a qiime mappings file
     #
     open my $conf_fh, "<", $options->{'config'} or die "Error: Could not read config file ".$options->{'config'}."\n$!\n";
-    while(<$conf_fh>)
-    {
+    while(<$conf_fh>) {
         next if($_ =~ /^#/);
         last if($_ =~ /^@/);
         chomp $_;
@@ -214,46 +209,11 @@ sub parse_config_results
     {
         chomp $_;
         my @fields = split /=/, $_;
-        if($#fields > 0)
-        {
-            if($fields[0] eq "NORMALISE")
-            {
+        if ($#fields > 0) {
+            if($fields[0] eq "NORMALISE") {
                 # is this guy set?
-                if($fields[1] ne "")
-                {
+                if($fields[1] ne "") {
                     $global_norm = int($fields[1]);
-                }
-            }
-            elsif($fields[0] eq "MUL_RARE_M")
-            {
-                # is this guy set?
-                if($fields[1] ne "")
-                {
-                    $global_rare_M = int($fields[1]);
-                }
-            }
-            elsif($fields[0] eq "MUL_RARE_X")
-            {
-                # is this guy set?
-                if($fields[1] ne "")
-                { 
-                    $global_rare_X = int($fields[1]);
-                }
-            }
-            elsif($fields[0] eq "MUL_RARE_S")
-            {
-                # is this guy set?
-                if($fields[1] ne "")
-                { 
-                    $global_rare_S = int($fields[1]);
-                }
-            }
-            elsif($fields[0] eq "MUL_RARE_N")
-            {
-                # is this guy set?
-                if($fields[1] ne "")
-                { 
-                    $global_rare_N = int($fields[1]);
                 }
             }
         }
