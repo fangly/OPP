@@ -62,7 +62,7 @@ our @EXPORT=qw(
 
 #
 # A file is created in PyroDB which can be used to split the sff file and 
-# make all the relavant job dirs etc... XXX.pdbm
+# make all the relevant job dirs etc... XXX.pdbm
 # This file is basically a qiime mapping file, BUT it has the same name as
 # the sff. (or fasta and qual). The format is given below:
 #
@@ -117,13 +117,13 @@ our $OPP_BYRUN = $OPP_ROOT."/by_run";
 #
 # We make a number of directories durig the process. Store their names here
 #
-our $QA_dir = "QA";
 our $proc_dir = "processing";
-our $res_dir = "results";
+our $QA_dir   = "QA";
+our $res_dir  = "results";
 
-our $global_acacia_output_dir = "UNSET";
-our $global_working_dir = "UNSET";
-our $global_mapping_file = "UNSET";
+our $global_acacia_output_dir = undef;
+our $global_working_dir       = undef;
+our $global_mapping_file      = undef;
 
 #
 # We use a number of config file which are located all over the place. Just in case we move them., we can store them here...
@@ -183,10 +183,16 @@ sub makeOutputDirs
     # Directories must be made before we can put files there
     #
     my ($job_dir) = @_;
-    `mkdir -p $global_working_dir$job_dir/$QA_dir`;
-    `mkdir -p $global_working_dir$job_dir/$QA_dir/$global_acacia_output_dir`;
-    `mkdir -p $global_working_dir$job_dir/$proc_dir`;
-    `mkdir -p $global_working_dir$job_dir/$res_dir`;
+    my $qa_dir     = "$global_working_dir$job_dir/$QA_dir";
+    my $acacia_dir = "$global_working_dir$job_dir/$QA_dir/$global_acacia_output_dir";
+    my $proc_dir   = "$global_working_dir$job_dir/$proc_dir";
+    my $res_dir    = "$global_working_dir$job_dir/$res_dir";
+
+    for my $dir ( $qa_dir, $acacia_dir, $proc_dir, $res_dir ) {
+        if (not -e $dir) {
+           mkdir $dir or die "Error: Could not create dir $dir\n$!\n";
+        }
+    }
 }
 
 sub splitLibraries

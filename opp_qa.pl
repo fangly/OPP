@@ -22,18 +22,12 @@
 #
 ###############################################################################
 
-#pragmas
 use strict;
 use warnings;
-
-#core Perl modules
 use Getopt::Long;
-
-#CPAN modules
 use File::Basename;
 
-#locally-written modules
-#load the pretty names for the fields
+# OPP helper module
 use FindBin qw($Bin);
 use lib "$Bin";
 use OPPConfig;
@@ -81,7 +75,10 @@ parseConfigQA($options->{'config'});
 print "All good!\n";
 
 #### start the $QA_dir pipeline!
-chdir "$global_working_dir/$QA_dir";
+chdir "$global_working_dir/$QA_dir" or die "Error: Could not cd to directory $global_working_dir/$QA_dir\n$!\n";
+
+print "Global working dir is $global_working_dir\n";
+
 splitLibraries($job_ID);
 removeChimeras();
 denoise();

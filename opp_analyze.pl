@@ -82,13 +82,14 @@ parse_config_results();
 # Start the results pipeline!
 print "All good!\n";
 
-if (not -e "$global_working_dir/processing") {
-   mkdir "$global_working_dir/processing" or die "Error: Could not write output directory $global_working_dir/processing\n$!\n";
-}
 
-if (not -e "$global_working_dir/results/") {
-   mkdir "$global_working_dir/results/" or die "Error: Could not write output directory $global_working_dir/results\n$!\n";
-}
+# get the working directories
+getWorkingDirs($options->{'config'});
+
+# make the output directories
+makeOutputDirs("");
+
+
 
 # NORMALISE
 `cp $global_working_dir/QA/denoised_acacia/acacia_out__all_tags.seqOut $global_working_dir/processing/normalised.fa`; 
