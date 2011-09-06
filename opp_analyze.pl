@@ -130,7 +130,7 @@ my $step_size=($max_seqs-$min_seqs)/$num_steps;
 #`beta_diversity.py -i otu_table.txt -t normalised.fa_rep_set_aligned_pfiltered.tre -m weighted_unifrac,unweighted_unifrac -o $global_working_dir/results/beta_diversity`;
 
 
-print "Normalizing otu table...\n";
+print "Normalizing OTU table...\n";
 if(0 <= $global_norm){
     `multiple_rarefactions_even_depth.py -i otu_table.txt -o $global_working_dir/rare_tables/ -d $global_norm -n 100 --lineages_included --k`;
     `average_tables.pl $global_working_dir/rare_tables/ $global_working_dir/results/collated_otu_table.txt`;
@@ -250,16 +250,7 @@ sub checkParams {
 }
 
 sub printAtStart {
-print<<"EOF";
----------------------------------------------------------------- 
- $0
- Copyright (C) 2011 Michael Imelfort
-    
- This program comes with ABSOLUTELY NO WARRANTY;
- This is free software, and you are welcome to redistribute it
- under certain conditions: See the source for more details.
----------------------------------------------------------------- 
-EOF
+   print '';
 }
 
 __DATA__
