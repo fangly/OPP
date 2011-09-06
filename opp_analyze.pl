@@ -3,7 +3,7 @@
 
 =head1 NAME
 
-opp_make_results.pl
+opp_analyze.pl
 
 =head1 DESCRIPTION
 
@@ -11,12 +11,18 @@ Analyse 16S rRNA sequence data: produce OTU tables, normalize data by
 number of sequences, generate heat maps and rarefaction curves. Most
 steps use QIIME scripts.
 
-=head1 SYNOPSIS
+=head1 REQUIRED ARGUMENTS
 
-    opp_analyze.pl -c|config CONFIG_FILE [-help|h]
+=over
 
-      -c CONFIG_FILE               app config file to be processed
-      [-help -h]                   Displays basic usage information
+=item -c <config_file> | --config <config_file>
+
+OPP config file to use
+
+=for Euclid:
+   config_file.type: readable
+
+=back
 
 =head1 DEPENDENCIES
 
@@ -68,7 +74,7 @@ use Getopt::Long;
 use File::Basename;
 
 # From CPAN
-use Getopt::Euclid;
+use Getopt::Euclid qw( :minimal_keys );
 
 # Local OPP helper module from Perl script folder location
 use FindBin qw($Bin);
@@ -82,18 +88,14 @@ BEGIN {
     $| = 1;
 }
 
-# get input params and print copyright
-printAtStart();
-my $options = checkParams();
-
 ######################################################################
 # CODE HERE
 ######################################################################
 # GLOBALS
 my $global_working_dir = "~";
-my $global_conf_base = basename($options->{'config'});
+my $global_conf_full = $ARGV{'config'};
+my $global_conf_base = basename $global_conf_full;
 my %global_samp_ID_list = ();
-my $global_norm = 0;
 
 print "Checking if all the config checks out...\n";
 
@@ -107,13 +109,13 @@ $global_conf_base = $cb_2[0];
 # get the present dir
 my $pwd = `pwd`;
 chomp $pwd;
-$global_working_dir = dirname($pwd."/".$options->{'config'});
+$global_working_dir = dirname($pwd."/".$global_conf_full);
 
 # Override values from config
-parse_config_results();
+my $global_norm = parse_config_results( $global_conf_full );
 
 # get the working directories
-getWorkingDirs($options->{'config'});
+getWorkingDirs($global_conf_full);
 
 # make the output directories
 makeOutputDirs("");
@@ -224,9 +226,10 @@ sub get_max_lib_size {
 sub parse_config_results
 {
     #-----
-    # parse the app config file and produce a qiime mappings file
+    # parse the app config file and return the number of reads to use for normalization
     #
-    my $conf_file = $options->{'config'};
+    my ($conf_file) = @_;
+    my $global_norm;
     open my $conf_fh, "<", $conf_file or die "Error: Could not read config file $conf_file\n$!\n";
     while(<$conf_fh>) {
         next if($_ =~ /^#/);
@@ -248,40 +251,11 @@ sub parse_config_results
             if (not $value eq '') {
                 $global_norm = int($value);
             } else {
-                die "Error: You need to specify the number of sequences to use in the normalization step in the config file $options->{'config'}\n";
+                die "Error: You need to specify the number of sequences to use in the normalization step in the config file $conf_file\n";
             }
         }
     }    
     close $conf_fh;
-}
-
-######################################################################
-# TEMPLATE SUBS
-######################################################################
-sub checkParams {
-    my @standard_options = ( "help|h+", "config|c:s" );
-    my %options;
-
-    # Add any other command line options, and the code to handle them
-    # 
-    GetOptions( \%options, @standard_options );
-
-    # if no arguments supplied print the usage and exit
-    #
-    exec("pod2usage $0") if (0 == (keys (%options) ));
-
-    # If the -help option is set, print the usage and exit
-    #
-    exec("pod2usage $0") if $options{'help'};
-
-    # Compulsosy items
-    if(!exists $options{'config'} ) { print "**ERROR: you MUST give a config file\n"; exec("pod2usage $0"); }
-    #if(!exists $options{''} ) { print "**ERROR: \n"; exec("pod2usage $0"); }
-
-    return \%options;
-}
-
-sub printAtStart {
-   print '';
+    return $global_norm;
 }
 

@@ -102,7 +102,7 @@ use Getopt::Long;
 use File::Basename;
 
 # From CPAN
-use Getopt::Euclid;
+###use Getopt::Euclid;
 
 # Local OPP helper module from Perl script folder location
 use FindBin qw($Bin);
@@ -120,10 +120,6 @@ BEGIN {
 printAtStart();
 
 my $options = checkParams();
-
-######################################################################
-# CODE HERE
-######################################################################
 
 print "Checking if all the config checks out...\t\t";
 # acacia config file
@@ -165,15 +161,7 @@ print "Fixing read counts...\n";
 getReadCounts();
 updateConfigQA($options->{'config'});
 
-######################################################################
-# CUSTOM SUBS
-######################################################################
-
-## SEE ./lib/OppConfig.pm
-
-######################################################################
 # TEMPLATE SUBS
-######################################################################
 sub checkParams {
     my @standard_options = ( "help|h+", "config|c:s", "acacia_conf:s" );
     my %options;
