@@ -230,7 +230,7 @@ sub getReadCounts
     # $CHIME_good_file
     # $global_acacia_output_dir/$ACACIA_out_file
     #
-    open my $tmp_fh, "<", $QIIME_split_out or die "Error: Could not open file $QIIME_split_out\n$!\n";
+    open my $tmp_fh, "<", $QIIME_split_out or die "Error: Could not read file $QIIME_split_out\n$!\n";
     while(<$tmp_fh>)
     {
         next if(!($_ =~ /^>/));
@@ -248,7 +248,7 @@ sub getReadCounts
         }
     }
     
-    open $tmp_fh, "<", $CHIME_good_file or die "Error: Could not open file $CHIME_good_file\n$!\n";
+    open $tmp_fh, "<", $CHIME_good_file or die "Error: Could not read file $CHIME_good_file\n$!\n";
     while(<$tmp_fh>)
     {
         next if(!($_ =~ /^>/));
@@ -266,7 +266,7 @@ sub getReadCounts
         }
     }    
 
-    open $tmp_fh, "<", "$global_acacia_output_dir/$ACACIA_out_file" or die $!;
+    open $tmp_fh, "<", "$global_acacia_output_dir/$ACACIA_out_file" or die "Error: Could not read file $global_acacia_output_dir/$ACACIA_out_file\n$!\n";
     while(<$tmp_fh>)
     {
         next if(!($_ =~ /^>/));
@@ -291,7 +291,7 @@ sub parseConfigQA
     # parse the app config file and produce a qiime mappings file
     #
     my ($config_prefix) = @_;
-    open my $conf_fh, "<", $config_prefix or die $!;
+    open my $conf_fh, "<", $config_prefix or die "Error: Could not read file $config_prefix\n$!\n";
     open my $mapping, ">", $global_mapping_file or die $!;
     print $mapping "$FNB_HEADER\n";
     while(<$conf_fh>)
