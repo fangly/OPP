@@ -1,7 +1,7 @@
 #! /usr/bin/env perl
 ###############################################################################
 #
-#    app_make_results.pl
+#    opp_make_results.pl
 #    
 #    Normalise and complete the QIIME pieline
 #
@@ -34,7 +34,9 @@ use File::Basename;
 
 #locally-written modules
 #load the pretty names for the fields
-use AppConfig;
+use FindBin qw($Bin);
+use lib "$Bin";
+use OPPConfig;
 
 BEGIN {
     select(STDERR);
@@ -110,7 +112,7 @@ print "Making otu table...\n";
 print "Normalizing otu table...\n";
 if(0 <= $global_norm){
     `multiple_rarefactions_even_depth.py -i otu_table.txt -o $global_working_dir/rare_tables/ -d $global_norm -n 100 --lineages_included --k`;
-    `perl $global_working_dir/average_tables.pl $global_working_dir/rare_tables/ $global_working_dir/results/collated_otu_table.txt`;
+    `average_tables.pl $global_working_dir/rare_tables/ $global_working_dir/results/collated_otu_table.txt`;
     
 }
 
@@ -118,7 +120,7 @@ print "Summarizing taxa.....\n";
 `summarize_taxa.py -i $global_working_dir/collated_otu_table.txt -o $global_working_dir/results`;
 
 print "Generating Genus-level heat map.....\n";
-`perl $global_working_dir/getColors.pl $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/color_file.txt`;
+`getColors.pl $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/color_file.txt`;
 `R --vanilla --slave --args $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $global_working_dir/HeatMap.R`;
 
 

@@ -1,7 +1,7 @@
 #! /usr/bin/env perl
 ###############################################################################
 #
-#    app_do_QA.pl
+#    opp_do_QA.pl
 #    
 #    Uses qiime scripts + acacia to do mid splitting and denoising
 #
@@ -34,7 +34,9 @@ use File::Basename;
 
 #locally-written modules
 #load the pretty names for the fields
-use AppConfig;
+use FindBin qw($Bin);
+use lib "$Bin";
+use OPPConfig;
 
 BEGIN {
     select(STDERR);
@@ -93,7 +95,7 @@ updateConfigQA($options->{'config'});
 # CUSTOM SUBS
 ######################################################################
 
-## SEE ./lib/AppConfig.pm
+## SEE ./lib/OppConfig.pm
 
 ######################################################################
 # TEMPLATE SUBS

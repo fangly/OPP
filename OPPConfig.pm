@@ -1,7 +1,6 @@
-#!/usr/bin/perl
 ###############################################################################
 #
-#    AppConfig.pl
+#    OppConfig.pm
 #    
 #    Makes more useful names for the fields in the config file
 #    The app_* scripts should include this file first
@@ -22,12 +21,44 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-package AppConfig;
+package OppConfig;
 require Exporter;
 use File::Basename;
 
 our @ISA = qw(Exporter);
-our @EXPORT=qw(%FNB %FNA $FNB_HEADER $FNA_HEADER $FNA_LINE_FINISHER $FNA_FOOTER $APP_ROOT $APP_RAW $APP_BYJOB $APP_BYRUN %global_samp_ID_list %global_raw_counts %global_chimer_counts %global_acacia_counts $global_acacia_config $global_barcode_length $QA_dir $proc_dir $res_dir $global_acacia_output_dir $global_working_dir $global_mapping_file $QIIME_split_out getWorkingDirs makeOutputDirs splitLibraries removeChimeras denoise getReadCounts parseConfigQA updateConfigQA);
+our @EXPORT=qw(
+   %FNB
+   %FNA
+   $FNB_HEADER
+   $FNA_HEADER
+   $FNA_LINE_FINISHER
+   $FNA_FOOTER
+   $APP_ROOT
+   $APP_RAW
+   $APP_BYJOB
+   $APP_BYRUN
+   %global_samp_ID_list
+   %global_raw_counts
+   %global_chimer_counts
+   %global_acacia_counts
+   $global_acacia_config
+   $global_barcode_length
+   $QA_dir
+   $proc_dir
+   $res_dir
+   $global_acacia_output_dir
+   $global_working_dir
+   $global_mapping_file 
+   $QIIME_split_out
+   getWorkingDirs
+   makeOutputDirs
+   splitLibraries 
+   removeChimeras
+   denoise
+   getReadCounts
+   parseConfigQA
+   updateConfigQA
+);
 
 #
 # A file is created in PyroDB which can be used to split the sff file and 
