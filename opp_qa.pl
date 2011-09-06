@@ -136,7 +136,7 @@ print<<"EOF";
 EOF
 }
 
-__DATA__
+__END__
 
 =head1 NAME
 

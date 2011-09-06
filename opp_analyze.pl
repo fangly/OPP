@@ -290,7 +290,7 @@ sub printAtStart {
    print '';
 }
 
-__DATA__
+__END__
 
 =head1 NAME
 
