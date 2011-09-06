@@ -117,11 +117,11 @@ if(0 <= $global_norm){
 }
 
 print "Summarizing by taxa.....\n";
-`summarize_taxa.py -i $global_working_dir/collated_otu_table.txt -o $global_working_dir/results`;
+`summarize_taxa.py -i $global_working_dir/results/collated_otu_table.txt -o $global_working_dir/results`;
 
 print "Generating Genus-level heat map.....\n";
 `getColors.pl $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/color_file.txt`;
-`R --vanilla --slave --args $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $global_working_dir/HeatMap.R`;
+`R --vanilla --slave --args $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R`;
 
 
 print "Rarefaction and diversity...\n";
@@ -157,7 +157,7 @@ sub parse_config_results
     #-----
     # parse the app config file and produce a qiime mappings file
     #
-    open my $conf_fh, "<", $options->{'config'} or die "Error: Could not read config file ".$options->{'config'}."\n$!\n;
+    open my $conf_fh, "<", $options->{'config'} or die "Error: Could not read config file ".$options->{'config'}."\n$!\n";
     while(<$conf_fh>)
     {
         next if($_ =~ /^#/);

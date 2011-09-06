@@ -85,7 +85,7 @@ $FNB{'Description'} = 3;
 # <SID>     MID             acgggcggtgtgtRc         <PDB sample name>   XX  XX      XX  XX
 # ...
 #
-our $FNA_HEADER = "#SampleID\tBarcodeSequence\tLinkerPrimerSequence\tDescription\tRAW\tCHIME\tACC\tUSE";
+our $FNA_HEADER = "#SampleID\tBarcodeSequence\tLinkerPrimerSequence\tDescription\tRAW\tUCHIME\tACACIA\tUSE";
 our $FNA_LINE_FINISHER = "\tXX\tXX\tXX\t1\n";
 our $FNA_FOOTER = "@@\
 NORMALISE=\
@@ -230,7 +230,7 @@ sub getReadCounts
     # $CHIME_good_file
     # $global_acacia_output_dir/$ACACIA_out_file
     #
-    open my $tmp_fh, "<", $QIIME_split_out or die $!;
+    open my $tmp_fh, "<", $QIIME_split_out or die "Error: Could not open file $QIIME_split_out\n$!\n";
     while(<$tmp_fh>)
     {
         next if(!($_ =~ /^>/));
@@ -248,7 +248,7 @@ sub getReadCounts
         }
     }
     
-    open $tmp_fh, "<", $CHIME_good_file or die $!;
+    open $tmp_fh, "<", $CHIME_good_file or die "Error: Could not open file $CHIME_good_file\n$!\n";
     while(<$tmp_fh>)
     {
         next if(!($_ =~ /^>/));
