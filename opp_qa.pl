@@ -3,7 +3,7 @@
 
 =head1 NAME
 
-opp_do_QA.pl
+opp_qa.pl
 
 =head1 DESCRIPTION
 
@@ -25,24 +25,39 @@ Correct sequencing errors (ACACIA)
 
 =back
 
-=head1 SYNOPSIS
+=head1 REQUIRED ARGUMENTS
 
-    opp_qa.pl -c|config CONFIG_FILE [-help|h]
+=over
 
-      -c CONFIG_FILE               app config file to be processed
-      [-acacia_conf CONFIG_FILE]   alternate acacia config file (Full path!)
-      [-help -h]                   Displays basic usage information
-         
-         
-    NOTE:
-      
-    If you specify a different acacia config file, then you must use
-    the following values, or this script will break!
+=item -c <config_file> | --config <config_file>
+
+OPP config file to use
+
+=for Euclid:
+   config_file.type: readable
+
+=back
+
+=head1 OPTIONS
+
+=over
+
+=item -a <acacia_conf> | --acacia <acacia_conf>
+
+Alternate Acacia config file to use
+
+NOTE: If you specify a different acacia config file, then you must use the
+following values, or this script will break!
       
     FASTA_LOCATION=good.fasta
     OUTPUT_DIR=denoised_acacia
     OUTPUT_PREFIX=acacia_out_
     SPLIT_ON_MID=FALSE
+
+=for Euclid:
+   acacia_conf.type: readable
+
+=back
 
 =head1 DEPENDENCIES
 
@@ -102,7 +117,7 @@ use Getopt::Long;
 use File::Basename;
 
 # From CPAN
-###use Getopt::Euclid;
+use Getopt::Euclid qw( :minimal_keys );
 
 # Local OPP helper module from Perl script folder location
 use FindBin qw($Bin);
@@ -116,34 +131,30 @@ BEGIN {
     $| = 1;
 }
 
-# get input params and print copyright
-printAtStart();
-
-my $options = checkParams();
 
 print "Checking if all the config checks out...\t\t";
 # acacia config file
-if(exists $options->{'acacia_conf'})
+if(exists $ARGV{'acacia'})
 {
     # user supplied config file
-    $global_acacia_config = $options->{'acacia_conf'};
+    $global_acacia_config = $ARGV{'acacia'};
 }
 if (!(-e $global_acacia_config)) { die "Acacia config file: $global_acacia_config does not exist!\n"; }
 
 # get the Job_ID we're working on
-my $job_ID = basename($options->{'config'});
+my $job_ID = basename($ARGV{'config'});
 my @cb_1 = split /_/, $job_ID;
 my @cb_2 = split /\./, $cb_1[1];
 $job_ID = $cb_2[0];
 
 # get the working directories
-getWorkingDirs($options->{'config'});
+getWorkingDirs($ARGV{'config'});
 
 # make the output directories
 makeOutputDirs("");
 
 # parse the config file
-parseConfigQA($options->{'config'});
+parseConfigQA($ARGV{'config'});
 
 print "All good!\n";
 
@@ -159,33 +170,4 @@ denoise();
 #### Fix the config file
 print "Fixing read counts...\n";
 getReadCounts();
-updateConfigQA($options->{'config'});
-
-# TEMPLATE SUBS
-sub checkParams {
-    my @standard_options = ( "help|h+", "config|c:s", "acacia_conf:s" );
-    my %options;
-
-    # Add any other command line options, and the code to handle them
-    # 
-    GetOptions( \%options, @standard_options );
-
-    # if no arguments supplied print the usage and exit
-    #
-    exec("pod2usage $0") if (0 == (keys (%options) ));
-
-    # If the -help option is set, print the usage and exit
-    #
-    exec("pod2usage $0") if $options{'help'};
-
-    # Compulsosy items
-    if(!exists $options{'config'} ) { print "**ERROR: you MUST give a config file\n"; exec("pod2usage $0"); }
-    #if(!exists $options{''} ) { print "**ERROR: \n"; exec("pod2usage $0"); }
-
-    return \%options;
-}
-
-sub printAtStart {
-   print '';
-}
-
+updateConfigQA($ARGV{'config'});
