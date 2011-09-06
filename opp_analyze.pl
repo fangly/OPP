@@ -133,9 +133,9 @@ my $step_size = int(($max_seqs-$min_seqs)/$num_steps) || 1;
 
 
 print "Normalizing OTU table...\n";
-if(0 <= $global_norm){
-    `multiple_rarefactions_even_depth.py -i $global_working_dir/results/otu_table.txt -o $global_working_dir/rare_tables/ -d $global_norm -n 100 --lineages_included --k`;
-    `average_tables.pl $global_working_dir/rare_tables/ $global_working_dir/results/collated_otu_table.txt`;
+if($global_norm >= 0){
+    `multiple_rarefactions_even_depth.py -i $global_working_dir/results/otu_table.txt -o $global_working_dir/processing/rare_tables/ -d $global_norm -n 100 --lineages_included --k`;
+    `average_tables.pl $global_working_dir/processing/rare_tables/ $global_working_dir/results/collated_otu_table.txt`;
     
 }
 
