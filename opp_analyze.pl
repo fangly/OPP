@@ -1,39 +1,76 @@
 #! /usr/bin/env perl
-###############################################################################
-#
-#    opp_make_results.pl
-#    
-#    Normalise and complete the QIIME pieline
-#
-#    Copyright (C) 2011 Michael Imelfort
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-###############################################################################
 
-#pragmas
+
+=head1 NAME
+
+opp_make_results.pl
+
+=head1 DESCRIPTION
+
+Analyse 16S rRNA sequence data: produce OTU tables, normalize data by
+number of sequences, generate heat maps and rarefaction curves. Most
+steps use QIIME scripts.
+
+=head1 SYNOPSIS
+
+    opp_analyze.pl -c|config CONFIG_FILE [-help|h]
+
+      -c CONFIG_FILE               app config file to be processed
+      [-help -h]                   Displays basic usage information
+
+=head1 DEPENDENCIES
+
+You run this program, you need Perl and the following CPAN Perl modules:
+
+=over
+
+=item *
+
+Getopt::Euclid
+
+=back
+
+In addition, you need these bioinformatic programs installed:
+
+=over
+
+=item *
+
+QIIME
+
+=back
+         
+=head1 COPYRIGHT
+
+Copyright 2011 Florent Angly and Dana Willner
+
+Originally based on the APP scripts, copyright Michael Imelfort
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+=cut
+
+
 use strict;
 use warnings;
-
-#core Perl modules
 use Getopt::Long;
-
-#CPAN modules
 use File::Basename;
 
-#locally-written modules
-#load the pretty names for the fields
+# From CPAN
+use Getopt::Euclid;
+
+# Local OPP helper module from Perl script folder location
 use FindBin qw($Bin);
 use lib "$Bin";
 use OPPConfig;
@@ -58,7 +95,7 @@ my $global_conf_base = basename($options->{'config'});
 my %global_samp_ID_list = ();
 my $global_norm = 0;
 
-print "Checking if all the config checks out...\t\t";
+print "Checking if all the config checks out...\n";
 
 # Get the conf base
 my @cb_1 = split /_/, $global_conf_base;
@@ -74,10 +111,6 @@ $global_working_dir = dirname($pwd."/".$options->{'config'});
 
 # Override values from config
 parse_config_results();
-
-# Start the results pipeline!
-print "All good!\n";
-
 
 # get the working directories
 getWorkingDirs($options->{'config'});
@@ -251,40 +284,4 @@ sub checkParams {
 sub printAtStart {
    print '';
 }
-
-__END__
-
-=head1 NAME
-
-    app_make_results.pl
-
-=head1 COPYRIGHT
-
-   copyright (C) 2011 Michael Imelfort
-
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-=head1 DESCRIPTION
-
-   Insert detailed description here
-
-=head1 SYNOPSIS
-
-    app_make_results.pl -c|config CONFIG_FILE [-help|h]
-
-      -c CONFIG_FILE               app config file to be processed
-      [-help -h]                   Displays basic usage information
-         
-=cut
 

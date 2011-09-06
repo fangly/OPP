@@ -1,33 +1,110 @@
 #! /usr/bin/env perl
-###############################################################################
-#
-#    opp_do_QA.pl
-#    
-#    Uses qiime scripts + acacia to do mid splitting and denoising
-#
-#    Copyright (C) 2011 Michael Imelfort
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-###############################################################################
+
+
+=head1 NAME
+
+opp_do_QA.pl
+
+=head1 DESCRIPTION
+
+Pre-process 454 16S rRNA sequence data:
+
+=over
+
+=item 1.
+
+Split libraries by MID (QIIME)
+
+=item 2.
+
+Remove chimeras (UCHIME)
+
+=item 3.
+
+Correct sequencing errors (ACACIA)
+
+=back
+
+=head1 SYNOPSIS
+
+    opp_qa.pl -c|config CONFIG_FILE [-help|h]
+
+      -c CONFIG_FILE               app config file to be processed
+      [-acacia_conf CONFIG_FILE]   alternate acacia config file (Full path!)
+      [-help -h]                   Displays basic usage information
+         
+         
+    NOTE:
+      
+    If you specify a different acacia config file, then you must use
+    the following values, or this script will break!
+      
+    FASTA_LOCATION=good.fasta
+    OUTPUT_DIR=denoised_acacia
+    OUTPUT_PREFIX=acacia_out_
+    SPLIT_ON_MID=FALSE
+
+=head1 DEPENDENCIES
+
+You run this program, you need Perl and the following CPAN Perl modules:
+
+=over
+
+=item *
+
+Getopt::Euclid
+
+=back
+
+In addition, you need these bioinformatic programs installed:
+
+=over
+
+=item *
+
+QIIME
+
+=item *
+
+UCHIME
+
+=item *
+
+ACACIA
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright 2011 Florent Angly and Dana Willner
+
+Originally based on the APP scripts, copyright Michael Imelfort
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+=cut
+
 
 use strict;
 use warnings;
 use Getopt::Long;
 use File::Basename;
 
-# OPP helper module
+# From CPAN
+use Getopt::Euclid;
+
+# Local OPP helper module from Perl script folder location
 use FindBin qw($Bin);
 use lib "$Bin";
 use OPPConfig;
@@ -121,62 +198,6 @@ sub checkParams {
 }
 
 sub printAtStart {
-print<<"EOF";
----------------------------------------------------------------- 
- $0
- Copyright (C) 2011 Michael Imelfort
-    
- This program comes with ABSOLUTELY NO WARRANTY;
- This is free software, and you are welcome to redistribute it
- under certain conditions: See the source for more details.
----------------------------------------------------------------- 
-EOF
+   print '';
 }
-
-__END__
-
-=head1 NAME
-
-    app_do_QA.pl
-
-=head1 COPYRIGHT
-
-   copyright (C) 2011 Michael Imelfort
-
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-=head1 DESCRIPTION
-
-   Does filtering, denoising and de-replication of 454 pyrotag datasets
-
-=head1 SYNOPSIS
-
-    app_do_QA.pl -c|config CONFIG_FILE [-help|h]
-
-      -c CONFIG_FILE               app config file to be processed
-      [-acacia_conf CONFIG_FILE]   alternate acacia config file (Full path!)
-      [-help -h]                   Displays basic usage information
-         
-         
-    NOTE:
-      
-    If you specify a different acacia config file, then you must use
-    the following values, or this script will break!
-      
-    FASTA_LOCATION=good.fasta
-    OUTPUT_DIR=denoised_acacia
-    OUTPUT_PREFIX=acacia_out_
-    SPLIT_ON_MID=FALSE
-=cut
 

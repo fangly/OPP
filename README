@@ -1,4 +1,4 @@
-
+# To get started with running OPP, run these commands:
 module load qiime
 module load uclust
 module load R
