@@ -29,7 +29,7 @@ Correct sequencing errors (ACACIA)
 
 =over
 
-=item -c <config_file> | --config <config_file>
+=item -c <config_file> | --config_file <config_file>
 
 OPP config file to use
 
@@ -142,19 +142,19 @@ if(exists $ARGV{'acacia'})
 if (!(-e $global_acacia_config)) { die "Acacia config file: $global_acacia_config does not exist!\n"; }
 
 # get the Job_ID we're working on
-my $job_ID = basename($ARGV{'config'});
+my $job_ID = basename($ARGV{'config_file'});
 my @cb_1 = split /_/, $job_ID;
 my @cb_2 = split /\./, $cb_1[1];
 $job_ID = $cb_2[0];
 
 # get the working directories
-getWorkingDirs($ARGV{'config'});
+getWorkingDirs($ARGV{'config_file'});
 
 # make the output directories
 makeOutputDirs("");
 
 # parse the config file
-parseConfigQA($ARGV{'config'});
+parseConfigQA($ARGV{'config_file'});
 
 print "All good!\n";
 
@@ -170,4 +170,4 @@ denoise();
 #### Fix the config file
 print "Fixing read counts...\n";
 getReadCounts();
-updateConfigQA($ARGV{'config'});
+updateConfigQA($ARGV{'config_file'});
