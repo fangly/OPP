@@ -121,12 +121,12 @@ my $min_seqs=0;
 my $max_seqs=400;
 my $num_steps=10;
 my $step_size=($max_seqs-$min_seqs)/$num_steps;
-`multiple_rarefactions.py -i $global_working_dir/results/otu_table.txt  -o $global_working_dir/results/alpha_rare/rarefaction -m $min_seqs -x $max_seqs -n $num_steps -s $step_size`;
-`alpha_diversity.py -i $global_working_dir/results/alpha_rare/rarefaction/ -o $global_working_dir/results/alpha_rare/alpha_div/ -m observed_species,shannon`;
-`collate_alpha.py -i $global_working_dir/results/alpha_rare/alpha_div/ -o $global_working_dir/results/alpha_rare/alpha_div_collated/`;
+`multiple_rarefactions.py -i $global_working_dir/results/otu_table.txt  -o alpha_rare/rarefaction -m $min_seqs -x $max_seqs -n $num_steps -s $step_size`;
+`alpha_diversity.py -i alpha_rare/rarefaction/ -o alpha_rare/alpha_div/ -m observed_species,shannon`;
+`collate_alpha.py -i alpha_rare/alpha_div/ -o alpha_rare/alpha_div_collated/`;
 
 # Rarefaction plot: All metrics command
-`make_rarefaction_plots.py -i $global_working_dir/results/alpha_rare/alpha_div_collated/ -m $global_working_dir/QA/qiime_mapping.txt -o $global_working_dir/results/alpha_rare/alpha_rarefaction_plots/ --background_color white --resolution 75 --imagetype svg`;
+`make_rarefaction_plots.py -i alpha_rare/alpha_div_collated/ -m $global_working_dir/QA/qiime_mapping.txt -o $global_working_dir/results/alpha_rare/alpha_rarefaction_plots/ --background_color white --resolution 75 --imagetype svg`;
 #`beta_diversity.py -i otu_table.txt -t normalised.fa_rep_set_aligned_pfiltered.tre -m weighted_unifrac,unweighted_unifrac -o $global_working_dir/results/beta_diversity`;
 
 
