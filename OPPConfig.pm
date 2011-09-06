@@ -292,7 +292,7 @@ sub parseConfigQA
     #
     my ($config_prefix) = @_;
     open my $conf_fh, "<", $config_prefix or die "Error: Could not read file $config_prefix\n$!\n";
-    open my $mapping, ">", $global_mapping_file or die $!;
+    open my $mapping, ">", $global_mapping_file or die "Error: Could not write file $global_mapping_file\n$!\n";
     print $mapping "$FNB_HEADER\n";
     while(<$conf_fh>)
     {
@@ -323,8 +323,8 @@ sub updateConfigQA
     # this guy is called from within the QA dir so we need to do a ../ on the file names
     #
     my ($config_prefix) = @_;
-    open my $conf_fh, "<", "../$config_prefix" or die $!;
-    open my $conf_fh_tmp, ">", "../$config_prefix.tmp" or die $!;
+    open my $conf_fh, "<", "../$config_prefix" or die "Error: Could not read file ../$config_prefix\n$!\n";
+    open my $conf_fh_tmp, ">", "../$config_prefix.tmp" or die "Error: Could not write ../$config_prefix.tmp\n$!\n";
     while(<$conf_fh>)
     {
         if($_ =~ /^#/) { print $conf_fh_tmp $_; next; }
