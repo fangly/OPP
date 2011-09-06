@@ -1,4 +1,4 @@
- #!/usr/bin/perl
+#! /usr/bin/env perl
  $dir=$ARGV[0] or die "Please provide the folder where the rarefied OTU tables are located\n";
  $outfile=$ARGV[1] or die "Please specify output file name\n";
 

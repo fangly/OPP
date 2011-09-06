@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#! /usr/bin/env perl
 $infile=$ARGV[0] or die "No OTU table input";
 $outfile=$ARGV[1] or die "Please specify output file name";
 open IN, "$infile";
