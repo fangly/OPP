@@ -21,7 +21,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-package OppConfig;
+package OPPConfig;
 require Exporter;
 use File::Basename;
 
@@ -33,10 +33,10 @@ our @EXPORT=qw(
    $FNA_HEADER
    $FNA_LINE_FINISHER
    $FNA_FOOTER
-   $APP_ROOT
-   $APP_RAW
-   $APP_BYJOB
-   $APP_BYRUN
+   $OPP_ROOT
+   $OPP_RAW
+   $OPP_BYJOB
+   $OPP_BYRUN
    %global_samp_ID_list
    %global_raw_counts
    %global_chimer_counts
@@ -106,13 +106,13 @@ $FNA{'ACC'} = 6;
 $FNA{'USE'} = 7;
 
 #
-# APP_ROOT should be set by the module system. there are a number of dirs we need to get from there
+# The OPP_ROOT environment variable should be set. there are a number of dirs we need to get from there
 #
-our $APP_ROOT = `echo \$APP_ROOT`;
-chomp $APP_ROOT;
-our $APP_RAW = $APP_ROOT."/raw";
-our $APP_BYJOB = $APP_ROOT."/by_jobid";
-our $APP_BYRUN = $APP_ROOT."/by_run";
+our $OPP_ROOT = `echo \$OPP_ROOT`;
+chomp $OPP_ROOT;
+our $OPP_RAW = $OPP_ROOT."/raw";
+our $OPP_BYJOB = $OPP_ROOT."/by_jobid";
+our $OPP_BYRUN = $OPP_ROOT."/by_run";
 
 #
 # We make a number of directories durig the process. Store their names here

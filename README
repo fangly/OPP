@@ -1,0 +1,10 @@
+
+module load qiime
+module load uclust
+module load R
+
+# Add the path where the OPP scripts are installed
+export PATH=$PATH:/srv/whitlam/home/users/uqfangly/OPP
+
+# Add the path where the data files for OPP are installed
+export OPP_ROOT=/srv/whitlam/bio/data/pyrotags
