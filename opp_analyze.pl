@@ -147,10 +147,6 @@ print "Generating Genus-level heat map.....\n";
 `R --vanilla --slave --args $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R > R.stdout`;
 
 
-print "Tidy up...\n";
-`cp otu_table.txt $global_working_dir/results/`;
-#`cp normalised.fa_rep_set_aligned_pfiltered.tre $global_working_dir/results/`;
-
 print "Results are located in: $global_working_dir/results/\n";
 
 ######################################################################
