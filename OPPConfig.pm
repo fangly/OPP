@@ -81,7 +81,7 @@ $FNB{'Description'} = 3;
 # Once the sff has been munged, each job will be placed into a folder in the by_jobID dir
 # and given an app config file. The format is given below:
 #
-# #SampleID	BarcodeSequence	LinkerPrimerSequence	Description	        RAW	CHIME	ACC	USE
+# #SampleID	BarcodeSequence	LinkerPrimerSequence	Description	        RAW	UCHIME	ACACIA	USE
 # <SID>     MID             acgggcggtgtgtRc         <PDB sample name>   XX  XX      XX  XX
 # ...
 #
@@ -89,11 +89,7 @@ our $FNA_HEADER = "#SampleID\tBarcodeSequence\tLinkerPrimerSequence\tDescription
 our $FNA_LINE_FINISHER = "\tXX\tXX\tXX\t1\n";
 our $FNA_FOOTER = "@@\
 NORMALISE=\
-DB=0\
-MUL_RARE_M=\
-MUL_RARE_X=\
-MUL_RARE_S=\
-MUL_RARE_N=";
+DB=0";
 
 our %FNA = ();
 $FNA{'SampleID'} = 0;
@@ -101,16 +97,15 @@ $FNA{'BarcodeSequence'} = 1;
 $FNA{'LinkerPrimerSequence'} = 2;
 $FNA{'Description'} = 3;
 $FNA{'RAW'} = 4;
-$FNA{'CHIME'} = 5;
-$FNA{'ACC'} = 6;
+$FNA{'UCHIME'} = 5;
+$FNA{'ACACIA'} = 6;
 $FNA{'USE'} = 7;
 
 #
 # The OPP_ROOT environment variable should be set. there are a number of dirs we need to get from there
 #
-our $OPP_ROOT = `echo \$OPP_ROOT`;
-chomp $OPP_ROOT;
-our $OPP_RAW = $OPP_ROOT."/raw";
+our $OPP_ROOT  = $ENV{OPP_ROOT};
+our $OPP_RAW   = $OPP_ROOT."/raw";
 our $OPP_BYJOB = $OPP_ROOT."/by_jobid";
 our $OPP_BYRUN = $OPP_ROOT."/by_run";
 
@@ -136,9 +131,9 @@ our $global_barcode_length = "variable_length";
 #
 my $QIIME_map_file = "qiime_mapping.txt";
 our $QIIME_split_out = "seqs.fna";
-my $CHIME_gg_file = "/srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/rep_set/gg_97_otus_6oct2010.fasta";
-my $CHIME_good_file = "good.fasta";
-my $CHIME_bad_file = "ch.fasta";
+my $UCHIME_gg_file = "/srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/rep_set/gg_97_otus_6oct2010.fasta";
+my $UCHIME_good_file = "good.fasta";
+my $UCHIME_bad_file = "ch.fasta";
 my $ACACIA_out_file = "acacia_out__all_tags.seqOut";
 
 #
@@ -211,7 +206,7 @@ sub removeChimeras
     # Remove chimeras using uclust
     #
     print "Removing chimeras...\n";
-    `usearch --uchime seqs.fna --db $CHIME_gg_file --nonchimeras $CHIME_good_file --chimeras $CHIME_bad_file`;
+    `usearch --uchime seqs.fna --db $UCHIME_gg_file --nonchimeras $UCHIME_good_file --chimeras $UCHIME_bad_file`;
 }
 
 sub denoise
@@ -233,7 +228,7 @@ sub getReadCounts
     #
     # the three files to parse are:
     # $QIIME_split_out
-    # $CHIME_good_file
+    # $UCHIME_good_file
     # $global_acacia_output_dir/$ACACIA_out_file
     #
     open my $tmp_fh, "<", $QIIME_split_out or die "Error: Could not read file $QIIME_split_out\n$!\n";
@@ -254,7 +249,7 @@ sub getReadCounts
         }
     }
     
-    open $tmp_fh, "<", $CHIME_good_file or die "Error: Could not read file $CHIME_good_file\n$!\n";
+    open $tmp_fh, "<", $UCHIME_good_file or die "Error: Could not read file $UCHIME_good_file\n$!\n";
     while(<$tmp_fh>)
     {
         next if(!($_ =~ /^>/));

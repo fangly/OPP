@@ -117,7 +117,7 @@ print "Rarefaction and diversity...\n";
 #need to grep for params
 my $min_seqs  = 1; #will not compute values for zero
 my $max_seqs  = get_max_lib_size( 'otu_table_stats.txt' );
-my $num_reps = 10;
+my $num_reps  = 20;
 my $num_steps = 30;
 my $step_size = int(($max_seqs-$min_seqs)/$num_steps) || 1;
 `multiple_rarefactions.py -i $global_working_dir/results/otu_table.txt  -o alpha_rare/rarefaction -m $min_seqs -x $max_seqs -n $num_reps -s $step_size`;
@@ -193,7 +193,8 @@ sub parse_config_results
     #-----
     # parse the app config file and produce a qiime mappings file
     #
-    open my $conf_fh, "<", $options->{'config'} or die "Error: Could not read config file ".$options->{'config'}."\n$!\n";
+    my $conf_file = $options->{'config'};
+    open my $conf_fh, "<", $conf_file or die "Error: Could not read config file $conf_file\n$!\n";
     while(<$conf_fh>) {
         next if($_ =~ /^#/);
         last if($_ =~ /^@/);
@@ -205,16 +206,16 @@ sub parse_config_results
     }
     
     # user options section
-    while(<$conf_fh>)
-    {
+    while(<$conf_fh>) {
         chomp $_;
-        my @fields = split /=/, $_;
-        if ($#fields > 0) {
-            if($fields[0] eq "NORMALISE") {
-                # is this guy set?
-                if($fields[1] ne "") {
-                    $global_norm = int($fields[1]);
-                }
+        my ($field, $value) = split '=', $_;
+        next if not defined $field;
+        if($field eq "NORMALISE") {
+            # is this guy set?
+            if (not $value eq '') {
+                $global_norm = int($value);
+            } else {
+                die "Error: You need to specify the number of sequences to use in the normalization step in the config file $options->{'config'}\n";
             }
         }
     }    
