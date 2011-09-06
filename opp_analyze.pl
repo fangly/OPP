@@ -62,7 +62,7 @@ my $global_rare_X = 100;
 my $global_rare_S = 10;
 my $global_rare_N = 10;
 
-print "Checking is all the config checks out...\t\t";
+print "Checking if all the config checks out...\t\t";
 
 #### Get the conf base
 my @cb_1 = split /_/, $global_conf_base;
@@ -92,10 +92,10 @@ print "All good!\n";
 
 chdir "$global_working_dir/processing";
 
-print "Picking OTUs...\n";
+print "Clustering OTUs...\n";
 `pick_otus.py -i normalised.fa`;
 
-print "Gettting a representitive set...\n";
+print "Picking OTU representative sequences...\n";
 `pick_rep_set.py -i uclust_picked_otus/normalised_otus.txt -f normalised.fa`;
 
 print "Assigning taxonomy...\n";
@@ -106,7 +106,7 @@ print "Assigning taxonomy...\n";
 #`filter_alignment.py -i pynast_aligned/normalised.fa_rep_set_aligned.fasta`;
 #`make_phylogeny.py -i normalised.fa_rep_set_aligned_pfiltered.fasta -r midpoint`;
 
-print "Making otu table...\n";
+print "Making OTU table...\n";
 `make_otu_table.py -i uclust_picked_otus/normalised_otus.txt -t blast_assigned_taxonomy/normalised.fa_rep_set_tax_assignments.txt -o otu_table.txt`;
 
 print "Normalizing otu table...\n";
@@ -116,7 +116,7 @@ if(0 <= $global_norm){
     
 }
 
-print "Summarizing taxa.....\n";
+print "Summarizing by taxa.....\n";
 `summarize_taxa.py -i $global_working_dir/collated_otu_table.txt -o $global_working_dir/results`;
 
 print "Generating Genus-level heat map.....\n";
@@ -157,7 +157,7 @@ sub parse_config_results
     #-----
     # parse the app config file and produce a qiime mappings file
     #
-    open my $conf_fh, "<", $options->{'config'} or die $!;
+    open my $conf_fh, "<", $options->{'config'} or die "Error: Could not read config file ".$options->{'config'}."\n$!\n;
     while(<$conf_fh>)
     {
         next if($_ =~ /^#/);
