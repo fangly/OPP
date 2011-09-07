@@ -97,6 +97,7 @@ use strict;
 use warnings;
 use Getopt::Long;
 use File::Basename;
+use List::Util qw( min );
 
 # From CPAN
 use Getopt::Euclid qw( :minimal_keys );
@@ -134,7 +135,7 @@ chomp $pwd;
 $global_working_dir = dirname($pwd."/".$global_conf_full);
 
 # Override values from config
-parse_config_results( $global_conf_full );
+getSamples( $global_conf_full );
 
 # get the working directories
 getWorkingDirs($global_conf_full);
@@ -210,11 +211,13 @@ print "Generating Genus-level heat map.....\n";
 
 print "Results are located in: $global_working_dir/results/\n";
 
+
 #------------------------------------------------------------------------------#
+
 
 sub pick_best_sample_size {
    # Given the number of sequences in the smallest libraries, pick the first
-   # number of sequences smaller than than in a list of possible values
+   # number of sequences smaller than that in a list of possible values
    my ($smallest_lib, $sample_sizes) = @_;
    my $best;
    for my $sample_size (@$sample_sizes) {
@@ -223,8 +226,15 @@ sub pick_best_sample_size {
          last;
       }
    }
+   if (not defined $best) {
+      my $min_sample_size = min @$sample_size;
+      die "Error: Could not find a suitable sample size. The smallest sample ".
+         "requested for normalization was $min_sample_size sequences but your ".
+         "smallest library had only $smallest_lib sequences.\n"; 
+   }
    return $best;
 }
+
 
 sub get_lib_stats {
    my ($stat_file) = @_; 
@@ -266,10 +276,10 @@ sub get_lib_stats {
 }
 
 
-sub parse_config_results
+sub getSamples
 {
     #-----
-    # parse the app config file and return the number of reads to use for normalization
+    # parse the app config file and return which samples to use
     #
     my ($conf_file) = @_;
     my $global_norm;
