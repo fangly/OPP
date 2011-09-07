@@ -227,7 +227,7 @@ sub pick_best_sample_size {
       }
    }
    if (not defined $best) {
-      my $min_sample_size = min @$sample_size;
+      my $min_sample_size = min @$sample_sizes;
       die "Error: Could not find a suitable sample size. The smallest sample ".
          "requested for normalization was $min_sample_size sequences but your ".
          "smallest library had only $smallest_lib sequences.\n"; 
