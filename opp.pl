@@ -83,8 +83,8 @@ use OPPConfig;
 
 # Run the pipeline
 my $config_file = $ARGV{'config_file'};
-run "opp_qa.pl -c $config_file";
-run "opp_analyze.pl -c $config_file";
+run( "opp_qa.pl -c $config_file" );
+run( "opp_analyze.pl -c $config_file" );
 
 exit;
 

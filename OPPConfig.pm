@@ -346,17 +346,14 @@ sub updateConfigQA
     close $conf_fh;
     close $conf_fh_tmp;
     
-    my $mv_string  = "mv ../$config_prefix.tmp ../$config_prefix";
-    `$mv_string`;
+    `mv ../$config_prefix.tmp ../$config_prefix`;
 }
 
 
 sub run {
    my ($cmd) = @_;
-   my $err_msg = "Error running command:\n".
-                 "   $cmd\n".
-                 "The command returned:\n".
-                 "   $?\n";
+   my $err_msg = "Error: The following command returned status $?:\n".
+                 "   $cmd\n";
    IPC::Run::run( $cmd ) or die $err_msg;
    return 1;
 }
