@@ -25,7 +25,7 @@ Run opp_analyze.pl
 
 =over
 
-=item -c <config_file> | --config_file <config_file>
+=item <config_file>
 
 OPP config file to use
 
