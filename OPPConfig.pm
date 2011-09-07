@@ -24,6 +24,7 @@
 package OPPConfig;
 require Exporter;
 use File::Basename;
+use IPC::Run;
 
 our @ISA = qw(Exporter);
 our @EXPORT=qw(
@@ -58,6 +59,7 @@ our @EXPORT=qw(
    getReadCounts
    parseConfigQA
    updateConfigQA
+   run
 );
 
 #
@@ -348,5 +350,15 @@ sub updateConfigQA
     `$mv_string`;
 }
 
+
+sub run {
+   my ($cmd) = @_;
+   my $err_msg = "Error running command:\n".
+                 "   $cmd\n".
+                 "The command returned:\n".
+                 "   $?\n";
+   IPC::Run::run( $cmd ) or die $err_msg;
+   return 1;
+}
 
 1;

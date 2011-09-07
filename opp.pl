@@ -76,7 +76,15 @@ use File::Basename;
 # From CPAN
 use Getopt::Euclid qw( :minimal_keys );
 
+# Local OPP helper module from Perl script folder location
+use FindBin qw($Bin);
+use lib "$Bin";
+use OPPConfig;
+
+# Run the pipeline
 my $config_file = $ARGV{'config_file'};
-`opp_qa.pl -c $config_file`;
-`opp_analyze.pl -c $config_file`;
+run "opp_qa.pl -c $config_file";
+run "opp_analyze.pl -c $config_file";
+
+exit;
 
