@@ -169,11 +169,7 @@ print "Making OTU table...\n";
 
 print "Rarefaction and diversity...\n";
 `per_library_stats.py -i $full_res_dir/otu_table.txt > $full_proc_dir/otu_table_stats.txt`;
-
-#need to grep for params
-
 my ($lib_min_seqs, $lib_max_seqs) = get_lib_stats( "$full_proc_dir/otu_table_stats.txt" );
-
 my $rare_min_seqs  = 1; # unfortunately, will not compute values for zero
 my $rare_max_seqs  = $lib_max_seqs;
 my $rare_num_reps  = 20;
@@ -200,11 +196,11 @@ if( $norm_num_reps > 0) {
 }
 
 print "Summarizing by taxa.....\n";
-`summarize_taxa.py -i $full_res_dir/normalized_otu_table.txt -o $full_res_dir`;
+`summarize_taxa.py -i $full_res_dir/normalized_otu_table.txt -o $full_res_dir/breakdown_by_taxonomy/`;
 
 print "Generating Genus-level heat map.....\n";
-`getColors.pl $full_res_dir/normalized_otu_table_L6.txt $full_res_dir/color_file.txt`;
-`R --vanilla --slave --args $full_res_dir/normalized_otu_table_L6.txt $full_res_dir/HeatMap.pdf $full_res_dir/color_file.txt < $Bin/HeatMap.R > $full_proc_dir/R.stdout`;
+`getColors.pl $full_res_dir/breakdown_by_taxonomy/normalized_otu_table_L6.txt $full_proc_dir/color_file.txt`;
+`R --vanilla --slave --args $full_res_dir/breakdown_by_taxonomy/normalized_otu_table_L6.txt $full_res_dir/HeatMap.pdf $full_proc_dir/color_file.txt < $Bin/HeatMap.R > $full_proc_dir/R.stdout`;
 
 
 print "Results are located in: $full_res_dir\n";
