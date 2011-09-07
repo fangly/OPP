@@ -140,6 +140,7 @@ getSamples( $global_conf_full );
 # get the working directories
 getWorkingDirs($global_conf_full);
 my $full_proc_dir = "$global_working_dir/$proc_dir";
+my $full_res_dir  = "$global_working_dir/$res_dir"; 
 
 
 # make the output directories
@@ -163,11 +164,11 @@ print "Assigning taxonomy...\n";
 #`make_phylogeny.py -i $full_proc_dir/normalised.fa_rep_set_aligned_pfiltered.fasta -r midpoint`;
 
 print "Making OTU table...\n";
-`make_otu_table.py -i $full_proc_dir/uclust_picked_otus/normalised_otus.txt -t $full_proc_dir/blast_assigned_taxonomy/normalised.fa_rep_set_tax_assignments.txt -o $global_working_dir/results/otu_table.txt`;
+`make_otu_table.py -i $full_proc_dir/uclust_picked_otus/normalised_otus.txt -t $full_proc_dir/blast_assigned_taxonomy/normalised.fa_rep_set_tax_assignments.txt -o $full_res_dir/otu_table.txt`;
 
 
 print "Rarefaction and diversity...\n";
-`per_library_stats.py -i $global_working_dir/results/otu_table.txt > $full_proc_dir/otu_table_stats.txt`;
+`per_library_stats.py -i $full_res_dir/otu_table.txt > $full_proc_dir/otu_table_stats.txt`;
 
 #need to grep for params
 
@@ -178,35 +179,35 @@ my $rare_max_seqs  = $lib_max_seqs;
 my $rare_num_reps  = 20;
 my $rare_num_steps = 30;
 my $rare_step_size = int(($rare_max_seqs - $rare_min_seqs)/$rare_num_steps) || 1;
-`multiple_rarefactions.py -i $global_working_dir/results/otu_table.txt  -o $full_proc_dir/alpha_rarefaction/rarefaction -m $rare_min_seqs -x $rare_max_seqs -n $rare_num_reps -s $rare_step_size`;
+`multiple_rarefactions.py -i $full_res_dir/otu_table.txt  -o $full_proc_dir/alpha_rarefaction/rarefaction -m $rare_min_seqs -x $rare_max_seqs -n $rare_num_reps -s $rare_step_size`;
 `alpha_diversity.py -i $full_proc_dir/alpha_rarefaction/rarefaction/ -o $full_proc_dir/alpha_rarefaction/alpha_div/ -m observed_species,shannon`;
 `collate_alpha.py -i $full_proc_dir/alpha_rarefaction/alpha_div/ -o $full_proc_dir/alpha_rarefaction/alpha_div_collated/`;
 
 # Rarefaction plot: All metrics command
-`make_rarefaction_plots.py -i $full_proc_dir/alpha_rarefaction/alpha_div_collated/ -m $global_working_dir/QA/qiime_mapping.txt -o $global_working_dir/results/alpha_rarefaction/ --background_color white --resolution 75 --imagetype svg`;
-#`beta_diversity.py -i otu_table.txt -t normalised.fa_rep_set_aligned_pfiltered.tre -m weighted_unifrac,unweighted_unifrac -o $global_working_dir/results/beta_diversity`;
+`make_rarefaction_plots.py -i $full_proc_dir/alpha_rarefaction/alpha_div_collated/ -m $global_working_dir/QA/qiime_mapping.txt -o $full_res_dir/alpha_rarefaction/ --background_color white --resolution 75 --imagetype svg`;
+#`beta_diversity.py -i otu_table.txt -t normalised.fa_rep_set_aligned_pfiltered.tre -m weighted_unifrac,unweighted_unifrac -o $full_res_dir/beta_diversity`;
 
 
 print "Normalizing OTU table...\n";
 my $norm_num_reps = $ARGV{num_reps};
 if( $norm_num_reps > 0) {
     my $norm_sample_size = pick_best_sample_size($lib_min_seqs, $ARGV{'sample_size'});
-    `multiple_rarefactions_even_depth.py -i $global_working_dir/results/otu_table.txt -o $full_proc_dir/rare_tables/ -d $norm_sample_size -n $norm_num_reps --lineages_included --k`;
-    `average_tables.pl $full_proc_dir/rare_tables/ $global_working_dir/results/normalized_otu_table.txt`;
+    `multiple_rarefactions_even_depth.py -i $full_res_dir/otu_table.txt -o $full_proc_dir/rare_tables/ -d $norm_sample_size -n $norm_num_reps --lineages_included --k`;
+    `average_tables.pl $full_proc_dir/rare_tables/ $full_res_dir/normalized_otu_table.txt`;
     
 } else {
    die "PROBABLY NEED TO DO SOMETHING WHEN NO NORMALIZATION REQUIRED\n";
 }
 
 print "Summarizing by taxa.....\n";
-`summarize_taxa.py -i $global_working_dir/results/normalized_otu_table.txt -o $global_working_dir/results`;
+`summarize_taxa.py -i $full_res_dir/normalized_otu_table.txt -o $full_res_dir`;
 
 print "Generating Genus-level heat map.....\n";
-`getColors.pl $global_working_dir/results/normalized_otu_table_L6.txt $global_working_dir/results/color_file.txt`;
-`R --vanilla --slave --args $global_working_dir/results/normalized_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R > $full_proc_dir/R.stdout`;
+`getColors.pl $full_res_dir/normalized_otu_table_L6.txt $full_res_dir/color_file.txt`;
+`R --vanilla --slave --args $full_res_dir/normalized_otu_table_L6.txt $full_res_dir/HeatMap.pdf $full_res_dir/color_file.txt < $Bin/HeatMap.R > $full_proc_dir/R.stdout`;
 
 
-print "Results are located in: $global_working_dir/results/\n";
+print "Results are located in: $full_res_dir\n";
 
 
 #------------------------------------------------------------------------------#
