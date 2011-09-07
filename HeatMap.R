@@ -1,3 +1,5 @@
+sink_file<-file("all.Rout",open="wt");
+sink(sink_file, type="message");
 args<-commandArgs(trailingOnly = T);
 #args1 should be the file name of heat map
 #args2 should be name for output svg file
