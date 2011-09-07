@@ -120,7 +120,7 @@ my $global_conf_full = $ARGV{'config_file'};
 my $global_conf_base = basename $global_conf_full;
 my %global_samp_ID_list = ();
 
-print "Checking if all the config checks out...\n";
+print "Checking config...\n";
 
 # Get the conf base
 my @cb_1 = split /_/, $global_conf_base;
@@ -139,54 +139,51 @@ getSamples( $global_conf_full );
 
 # get the working directories
 getWorkingDirs($global_conf_full);
+my $full_proc_dir = "$global_working_dir/$proc_dir";
+
 
 # make the output directories
 makeOutputDirs("");
 
-
-
 # NORMALISE
-`cp $global_working_dir/QA/denoised_acacia/acacia_out__all_tags.seqOut $global_working_dir/processing/normalised.fa`; 
-
-#### Don't chdir
-chdir "$global_working_dir/processing" or die "Error: Could not cd to directory $global_working_dir/processing\n$!\n";
+`cp $global_working_dir/QA/denoised_acacia/acacia_out__all_tags.seqOut $full_proc_dir/normalised.fa`; 
 
 print "Clustering OTUs...\n";
-`pick_otus.py -i normalised.fa`;
+`pick_otus.py -i $full_proc_dir/normalised.fa -o $full_proc_dir/uclust_picked_otus`;
 
 print "Picking OTU representative sequences...\n";
-`pick_rep_set.py -i uclust_picked_otus/normalised_otus.txt -f normalised.fa`;
+`pick_rep_set.py -i $full_proc_dir/uclust_picked_otus/normalised_otus.txt -f $full_proc_dir/normalised.fa`;
 
 print "Assigning taxonomy...\n";
-`assign_taxonomy.py -i normalised.fa_rep_set.fasta -t /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/taxonomies/otu_id_to_greengenes.txt -r /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/rep_set/gg_97_otus_6oct2010.fasta -m blast -e 1e-50`;
+`assign_taxonomy.py -i $full_proc_dir/normalised.fa_rep_set.fasta -o $full_proc_dir/blast_assigned_taxonomy/ -t /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/taxonomies/otu_id_to_greengenes.txt -r /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/rep_set/gg_97_otus_6oct2010.fasta -m blast -e 1e-50`;
 
 #print "Treeing...\n";
-#`align_seqs.py -i normalised.fa_rep_set.fasta -t /srv/whitlam/bio/db/gg/qiime_default/core_set_aligned.fasta.imputed -p 0.6`;
-#`filter_alignment.py -i pynast_aligned/normalised.fa_rep_set_aligned.fasta`;
-#`make_phylogeny.py -i normalised.fa_rep_set_aligned_pfiltered.fasta -r midpoint`;
+#`align_seqs.py -i $full_proc_dir/normalised.fa_rep_set.fasta -t /srv/whitlam/bio/db/gg/qiime_default/core_set_aligned.fasta.imputed -p 0.6`;
+#`filter_alignment.py -i $full_proc_dir/pynast_aligned/normalised.fa_rep_set_aligned.fasta`;
+#`make_phylogeny.py -i $full_proc_dir/normalised.fa_rep_set_aligned_pfiltered.fasta -r midpoint`;
 
 print "Making OTU table...\n";
-`make_otu_table.py -i uclust_picked_otus/normalised_otus.txt -t blast_assigned_taxonomy/normalised.fa_rep_set_tax_assignments.txt -o $global_working_dir/results/otu_table.txt`;
+`make_otu_table.py -i $full_proc_dir/uclust_picked_otus/normalised_otus.txt -t $full_proc_dir/blast_assigned_taxonomy/normalised.fa_rep_set_tax_assignments.txt -o $global_working_dir/results/otu_table.txt`;
 
 
 print "Rarefaction and diversity...\n";
-`per_library_stats.py -i $global_working_dir/results/otu_table.txt > otu_table_stats.txt`;
+`per_library_stats.py -i $global_working_dir/results/otu_table.txt > $full_proc_dir/otu_table_stats.txt`;
 
 #need to grep for params
 
-my ($lib_min_seqs, $lib_max_seqs) = get_lib_stats( 'otu_table_stats.txt' );
+my ($lib_min_seqs, $lib_max_seqs) = get_lib_stats( "$full_proc_dir/otu_table_stats.txt" );
 
 my $rare_min_seqs  = 1; # unfortunately, will not compute values for zero
 my $rare_max_seqs  = $lib_max_seqs;
 my $rare_num_reps  = 20;
 my $rare_num_steps = 30;
 my $rare_step_size = int(($rare_max_seqs - $rare_min_seqs)/$rare_num_steps) || 1;
-`multiple_rarefactions.py -i $global_working_dir/results/otu_table.txt  -o alpha_rare/rarefaction -m $rare_min_seqs -x $rare_max_seqs -n $rare_num_reps -s $rare_step_size`;
-`alpha_diversity.py -i alpha_rare/rarefaction/ -o alpha_rare/alpha_div/ -m observed_species,shannon`;
-`collate_alpha.py -i alpha_rare/alpha_div/ -o alpha_rare/alpha_div_collated/`;
+`multiple_rarefactions.py -i $global_working_dir/results/otu_table.txt  -o $full_proc_dir/alpha_rare/rarefaction -m $rare_min_seqs -x $rare_max_seqs -n $rare_num_reps -s $rare_step_size`;
+`alpha_diversity.py -i $full_proc_dir/alpha_rare/rarefaction/ -o $full_proc_dir/alpha_rare/alpha_div/ -m observed_species,shannon`;
+`collate_alpha.py -i $full_proc_dir/alpha_rare/alpha_div/ -o $full_proc_dir/alpha_rare/alpha_div_collated/`;
 
 # Rarefaction plot: All metrics command
-`make_rarefaction_plots.py -i alpha_rare/alpha_div_collated/ -m $global_working_dir/QA/qiime_mapping.txt -o $global_working_dir/results/alpha_rare/alpha_rarefaction_plots/ --background_color white --resolution 75 --imagetype svg`;
+`make_rarefaction_plots.py -i $full_proc_dir/alpha_rare/alpha_div_collated/ -m $global_working_dir/QA/qiime_mapping.txt -o $global_working_dir/results/alpha_rare/alpha_rarefaction_plots/ --background_color white --resolution 75 --imagetype svg`;
 #`beta_diversity.py -i otu_table.txt -t normalised.fa_rep_set_aligned_pfiltered.tre -m weighted_unifrac,unweighted_unifrac -o $global_working_dir/results/beta_diversity`;
 
 
@@ -194,8 +191,8 @@ print "Normalizing OTU table...\n";
 my $norm_num_reps = $ARGV{num_reps};
 if( $norm_num_reps > 0) {
     my $norm_sample_size = pick_best_sample_size($lib_min_seqs, $ARGV{'sample_size'});
-    `multiple_rarefactions_even_depth.py -i $global_working_dir/results/otu_table.txt -o $global_working_dir/processing/rare_tables/ -d $norm_sample_size -n $norm_num_reps --lineages_included --k`;
-    `average_tables.pl $global_working_dir/processing/rare_tables/ $global_working_dir/results/normalized_otu_table.txt`;
+    `multiple_rarefactions_even_depth.py -i $global_working_dir/results/otu_table.txt -o $full_proc_dir/rare_tables/ -d $norm_sample_size -n $norm_num_reps --lineages_included --k`;
+    `average_tables.pl $full_proc_dir/rare_tables/ $global_working_dir/results/normalized_otu_table.txt`;
     
 } else {
    die "PROBABLY NEED TO DO SOMETHING WHEN NO NORMALIZATION REQUIRED\n";
@@ -206,7 +203,7 @@ print "Summarizing by taxa.....\n";
 
 print "Generating Genus-level heat map.....\n";
 `getColors.pl $global_working_dir/results/normalized_otu_table_L6.txt $global_working_dir/results/color_file.txt`;
-`R --vanilla --slave --args $global_working_dir/results/normalized_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R > R.stdout`;
+`R --vanilla --slave --args $global_working_dir/results/normalized_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R > $full_proc_dir/R.stdout`;
 
 
 print "Results are located in: $global_working_dir/results/\n";

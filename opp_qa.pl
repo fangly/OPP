@@ -132,7 +132,7 @@ BEGIN {
 }
 
 
-print "Checking if all the config checks out...\t\t";
+print "Checking config...\n";
 # acacia config file
 if(exists $ARGV{'acacia'})
 {
@@ -156,7 +156,6 @@ makeOutputDirs("");
 # parse the config file
 parseConfigQA($ARGV{'config_file'});
 
-print "All good!\n";
 
 #### start the $QA_dir pipeline!
 chdir "$global_working_dir/$QA_dir" or die "Error: Could not cd to directory $global_working_dir/$QA_dir\n$!\n";
