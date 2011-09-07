@@ -142,11 +142,11 @@ getWorkingDirs($global_conf_full);
 my $full_proc_dir = "$global_working_dir/$proc_dir";
 my $full_res_dir  = "$global_working_dir/$res_dir"; 
 
-
 # make the output directories
 makeOutputDirs("");
 
-# NORMALISE
+
+# Start the pipeline
 `cp $global_working_dir/QA/denoised_acacia/acacia_out__all_tags.seqOut $full_proc_dir/normalised.fa`; 
 
 print "Clustering OTUs...\n";
@@ -185,25 +185,25 @@ my $rare_step_size = int(($rare_max_seqs - $rare_min_seqs)/$rare_num_steps) || 1
 
 
 print "Normalizing OTU table...\n";
+my $otu_table_file = "$full_res_dir/otu_table.txt";
 my $norm_num_reps = $ARGV{num_reps};
 if( $norm_num_reps > 0) {
     my $norm_sample_size = pick_best_sample_size($lib_min_seqs, $ARGV{'sample_size'});
-    `multiple_rarefactions_even_depth.py -i $full_res_dir/otu_table.txt -o $full_proc_dir/rare_tables/ -d $norm_sample_size -n $norm_num_reps --lineages_included --k`;
-    `average_tables.pl $full_proc_dir/rare_tables/ $full_res_dir/normalized_otu_table.txt`;
-    
-} else {
-   die "PROBABLY NEED TO DO SOMETHING WHEN NO NORMALIZATION REQUIRED\n";
+    print "Normalizing library size at $norm_sample_size sequences\n";
+    `multiple_rarefactions_even_depth.py -i $otu_table_file -o $full_proc_dir/rare_tables/ -d $norm_sample_size -n $norm_num_reps --lineages_included --k`;
+    $otu_table_file = "$full_res_dir/normalized_otu_table.txt";
+    `average_tables.pl $full_proc_dir/rare_tables/ $otu_table_file`;
 }
 
 print "Summarizing by taxa.....\n";
-`summarize_taxa.py -i $full_res_dir/normalized_otu_table.txt -o $full_res_dir/breakdown_by_taxonomy/`;
+`summarize_taxa.py -i $otu_table_file -o $full_res_dir/breakdown_by_taxonomy/`;
 
 print "Generating Genus-level heat map.....\n";
-`getColors.pl $full_res_dir/breakdown_by_taxonomy/normalized_otu_table_L6.txt $full_proc_dir/color_file.txt`;
-`R --vanilla --slave --args $full_res_dir/breakdown_by_taxonomy/normalized_otu_table_L6.txt $full_res_dir/HeatMap.pdf $full_proc_dir/color_file.txt < $Bin/HeatMap.R > $full_proc_dir/R.stdout`;
+`getColors.pl $full_res_dir/breakdown_by_taxonomy/*_L6.txt $full_proc_dir/color_file.txt`;
+`R --vanilla --slave --args $full_res_dir/breakdown_by_taxonomy/*_L6.txt $full_res_dir/HeatMap.pdf $full_proc_dir/color_file.txt < $Bin/HeatMap.R > $full_proc_dir/R.stdout`;
 
 
-print "Results are located in: $full_res_dir\n";
+print "\nYour results are located in: $full_res_dir\n\n";
 
 
 #------------------------------------------------------------------------------#
