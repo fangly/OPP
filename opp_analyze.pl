@@ -38,6 +38,15 @@ order of preference. Default: sample_size.default
    sample_size.type: int, sample_size > 0
    sample_size.default: [ 10000, 5000, 1000, 500, 100 ]
 
+=item -n <num_reps> | --num_reps <num_reps>
+
+Number of repetitions to do for the normalization by library size. Use 0 to not
+do any normalization. Default: num_reps.default
+
+=for Euclid:
+   num_reps.type: int, num_reps >= 0
+   num_reps.default: 1000
+
 =back
 
 =head1 DEPENDENCIES
@@ -127,10 +136,6 @@ $global_working_dir = dirname($pwd."/".$global_conf_full);
 # Override values from config
 parse_config_results( $global_conf_full );
 
-#### should be a param
-my $norm_num_reps = 100;
-####
-
 # get the working directories
 getWorkingDirs($global_conf_full);
 
@@ -185,21 +190,22 @@ my $rare_step_size = int(($rare_max_seqs - $rare_min_seqs)/$rare_num_steps) || 1
 
 
 print "Normalizing OTU table...\n";
+my $norm_num_reps = $ARGV{num_reps};
 if( $norm_num_reps > 0) {
     my $norm_sample_size = pick_best_sample_size($lib_min_seqs, $ARGV{'sample_size'});
     `multiple_rarefactions_even_depth.py -i $global_working_dir/results/otu_table.txt -o $global_working_dir/processing/rare_tables/ -d $norm_sample_size -n $norm_num_reps --lineages_included --k`;
-    `average_tables.pl $global_working_dir/processing/rare_tables/ $global_working_dir/results/collated_otu_table.txt`;
+    `average_tables.pl $global_working_dir/processing/rare_tables/ $global_working_dir/results/normalized_otu_table.txt`;
     
 } else {
    die "PROBABLY NEED TO DO SOMETHING WHEN NO NORMALIZATION REQUIRED\n";
 }
 
 print "Summarizing by taxa.....\n";
-`summarize_taxa.py -i $global_working_dir/results/collated_otu_table.txt -o $global_working_dir/results`;
+`summarize_taxa.py -i $global_working_dir/results/normalized_otu_table.txt -o $global_working_dir/results`;
 
 print "Generating Genus-level heat map.....\n";
-`getColors.pl $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/color_file.txt`;
-`R --vanilla --slave --args $global_working_dir/results/collated_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R > R.stdout`;
+`getColors.pl $global_working_dir/results/normalized_otu_table_L6.txt $global_working_dir/results/color_file.txt`;
+`R --vanilla --slave --args $global_working_dir/results/normalized_otu_table_L6.txt $global_working_dir/results/HeatMap.pdf $global_working_dir/results/color_file.txt < $Bin/HeatMap.R > R.stdout`;
 
 
 print "Results are located in: $global_working_dir/results/\n";
