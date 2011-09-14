@@ -186,12 +186,13 @@ my $rare_step_size = int(($rare_max_seqs - $rare_min_seqs)/$rare_num_steps) || 1
 
 print "Normalizing OTU table...\n";
 my $otu_table_file = "$full_res_dir/otu_table.txt";
+my $old_otu_table_file = "$full_res_dir/otu_table.txt";
 my $norm_num_reps = $ARGV{num_reps};
 my $norm_sample_size = pick_best_sample_size($lib_min_seqs, $ARGV{'sample_size'});
 if( $norm_num_reps > 0) {
     print "Normalizing library size at $norm_sample_size sequences\n";
     `multiple_rarefactions_even_depth.py -i $otu_table_file -o $full_proc_dir/rare_tables/ -d $norm_sample_size -n $norm_num_reps --lineages_included --k`;
-    $otu_table_file = "$full_res_dir/normalized_otu_table.txt";
+     $otu_table_file = "$full_res_dir/normalized_otu_table.txt";
     `average_tables.pl $full_proc_dir/rare_tables/ $otu_table_file`;
 }
 
@@ -204,10 +205,10 @@ print "Generating Genus-level heat map.....\n";
 
 print "Jacknifed beta diversity....\n";
 #Beta Diversity (weighted_unifrac, unweighted_unifrac) command 
-`beta_diversity.py -i $otu_table_file -o $full_proc_dir/beta_diversity --metrics weighted_unifrac,unweighted_unifrac -t $full_proc_dir/filtered/normalised.fa_rep_set_aligned_pfiltered.tre`;
+`beta_diversity.py -i $old_otu_table_file -o $full_proc_dir/beta_diversity --metrics weighted_unifrac,unweighted_unifrac -t $full_proc_dir/filtered/normalised.fa_rep_set_aligned_pfiltered.tre`;
 # Rarefaction command 
 my $rare_value = ($norm_sample_size*0.7);
-`multiple_rarefactions_even_depth.py -i $otu_table_file -d $rare_value -o $full_proc_dir/beta_diversity/rarefaction/ --num-reps 100`;
+`multiple_rarefactions_even_depth.py -i $old_otu_table_file -d $rare_value -o $full_proc_dir/beta_diversity/rarefaction/ --num-reps 100`;
 
 # UPGMA on full distance matrix: weighted_unifrac command 
 `upgma_cluster.py -i $full_proc_dir/beta_diversity/weighted_unifrac_normalized_otu_table.txt -o $full_proc_dir/beta_diversity/weighted_unifrac_normalized_otu_table_upgma.tre`; 
