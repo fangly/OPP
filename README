@@ -8,3 +8,8 @@ export PATH=$PATH:/srv/whitlam/home/users/uqfangly/OPP
 
 # Add the path where the data files for OPP are installed
 export OPP_ROOT=/srv/whitlam/bio/data/pyrotags
+
+# Add the path to where Perl modules are stored
+export PERL5LIB=/srv/whitlam/bio/apps/sw/cpan-modules/lib/perl5:$PERL5LIB
+export MANPATH=/srv/whitlam/bio/apps/sw/cpan-modules/share/man:$MANPATH
+
