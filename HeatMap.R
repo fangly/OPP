@@ -4,7 +4,9 @@ args<-commandArgs(trailingOnly = T);
 #args1 should be the file name of heat map
 #args2 should be name for output svg file
 #args3 should be rowsidecolors
-HM<-read.table(args[1],header=TRUE,row.names=1,sep="\t");
+HMold<-read.table(args[1],header=TRUE,sep="\t");
+x<-(dim(HMold)[2]-1);
+HM<-HMold[,x];
 library(gplots);
 library(RColorBrewer);
 rowcols<-read.table(args[3],header=FALSE);
