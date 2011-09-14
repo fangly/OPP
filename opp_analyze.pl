@@ -207,7 +207,7 @@ print "Jacknifed beta diversity....\n";
 #Beta Diversity (weighted_unifrac, unweighted_unifrac) command 
 `beta_diversity.py -i $old_otu_table_file -o $full_proc_dir/beta_diversity --metrics weighted_unifrac,unweighted_unifrac -t $full_proc_dir/filtered/normalised.fa_rep_set_aligned_pfiltered.tre`;
 # Rarefaction command 
-my $rare_value = ($norm_sample_size*0.7);
+my $rare_value = $norm_sample_size;
 `multiple_rarefactions_even_depth.py -i $old_otu_table_file -d $rare_value -o $full_proc_dir/beta_diversity/rarefaction/ --num-reps 100`;
 
 # UPGMA on full distance matrix: weighted_unifrac command 
