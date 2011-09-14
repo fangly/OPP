@@ -260,7 +260,6 @@ my $rare_value = ($norm_sample_size*0.7);
 
 # Make PDF of Jackknife tree with labeled support: unweighted unifrac command
 `make_bootstrapped_tree.py -m $full_proc_dir/beta_diversity/unweighted_unifrac/upgma_cmp/master_tree.tre -s $full_proc_dir/beta_diversity/unweighted_unifrac/upgma_cmp/jackknife_support.txt -o $full_res_dir/unweighted_unifrac_betadiv_jackknife_tree.pdf`;
-print "\nYour results are located in: $full_res_dir\n\n";
 
 
 print "\nYour results are located in: $full_res_dir\n\n";
