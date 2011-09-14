@@ -159,9 +159,9 @@ print "Assigning taxonomy...\n";
 `assign_taxonomy.py -i $full_proc_dir/normalised.fa_rep_set.fasta -o $full_proc_dir/blast_assigned_taxonomy/ -t /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/taxonomies/otu_id_to_greengenes.txt -r /srv/whitlam/bio/db/gg/qiime_default/gg_otus_6oct2010/rep_set/gg_97_otus_6oct2010.fasta -m blast -e 1e-50`;
 
 #print "Treeing...\n";
-#`align_seqs.py -i $full_proc_dir/normalised.fa_rep_set.fasta -t /srv/whitlam/bio/db/gg/qiime_default/core_set_aligned.fasta.imputed -p 0.6`;
-#`filter_alignment.py -i $full_proc_dir/pynast_aligned/normalised.fa_rep_set_aligned.fasta`;
-#`make_phylogeny.py -i $full_proc_dir/normalised.fa_rep_set_aligned_pfiltered.fasta -r midpoint`;
+`align_seqs.py -i $full_proc_dir/normalised.fa_rep_set.fasta -t /srv/whitlam/bio/db/gg/qiime_default/core_set_aligned.fasta.imputed -p 0.6 -o $full_proc_dir/pynast_aligned/`;
+`filter_alignment.py -i $full_proc_dir/pynast_aligned/normalised.fa_rep_set_aligned.fasta -o $full_proc_dir/filtered`; 
+`make_phylogeny.py -i $full_proc_dir/filtered/normalised.fa_rep_set_aligned_pfiltered.fasta -r midpoint`;
 
 print "Making OTU table...\n";
 `make_otu_table.py -i $full_proc_dir/uclust_picked_otus/normalised_otus.txt -t $full_proc_dir/blast_assigned_taxonomy/normalised.fa_rep_set_tax_assignments.txt -o $full_res_dir/otu_table.txt`;
@@ -187,8 +187,8 @@ my $rare_step_size = int(($rare_max_seqs - $rare_min_seqs)/$rare_num_steps) || 1
 print "Normalizing OTU table...\n";
 my $otu_table_file = "$full_res_dir/otu_table.txt";
 my $norm_num_reps = $ARGV{num_reps};
+my $norm_sample_size = pick_best_sample_size($lib_min_seqs, $ARGV{'sample_size'});
 if( $norm_num_reps > 0) {
-    my $norm_sample_size = pick_best_sample_size($lib_min_seqs, $ARGV{'sample_size'});
     print "Normalizing library size at $norm_sample_size sequences\n";
     `multiple_rarefactions_even_depth.py -i $otu_table_file -o $full_proc_dir/rare_tables/ -d $norm_sample_size -n $norm_num_reps --lineages_included --k`;
     $otu_table_file = "$full_res_dir/normalized_otu_table.txt";
@@ -201,6 +201,66 @@ print "Summarizing by taxa.....\n";
 print "Generating Genus-level heat map.....\n";
 `getColors.pl $full_res_dir/breakdown_by_taxonomy/*_L6.txt $full_proc_dir/color_file.txt`;
 `R --vanilla --slave --args $full_res_dir/breakdown_by_taxonomy/*_L6.txt $full_res_dir/HeatMap.pdf $full_proc_dir/color_file.txt < $Bin/HeatMap.R > $full_proc_dir/R.stdout`;
+
+print "Jacknifed beta diversity....\n";
+#Beta Diversity (weighted_unifrac, unweighted_unifrac) command 
+`beta_diversity.py -i $otu_table_file -o $full_proc_dir/beta_diversity --metrics weighted_unifrac,unweighted_unifrac -t $full_proc_dir/filtered/normalised.fa_rep_set_aligned_pfiltered.tre`;
+# Rarefaction command 
+my $rare_value = ($norm_sample_size*0.7);
+`multiple_rarefactions_even_depth.py -i $otu_table_file -d $rare_value -o $full_proc_dir/beta_diversity/rarefaction/ --num-reps 100`;
+
+# UPGMA on full distance matrix: weighted_unifrac command 
+`upgma_cluster.py -i $full_proc_dir/beta_diversity/weighted_unifrac_normalized_otu_table.txt -o $full_proc_dir/beta_diversity/weighted_unifrac_normalized_otu_table_upgma.tre`; 
+
+# Beta diversity on rarefied OTU tables (weighted_unifrac) command 
+`beta_diversity.py -i $full_proc_dir/beta_diversity/rarefaction/ -o $full_proc_dir/beta_diversity/weighted_unifrac/rare_dm/  -m weighted_unifrac  -t $full_proc_dir/filtered/normalised.fa_rep_set_aligned_pfiltered.tre`;
+
+# UPGMA on rarefied distance matrix (weighted_unifrac) command 
+`upgma_cluster.py -i $full_proc_dir/beta_diversity/weighted_unifrac/rare_dm/ -o $full_proc_dir/beta_diversity/weighted_unifrac/rare_upgma/`; 
+
+# consensus on rarefied distance matrices (weighted_unifrac) command 
+`consensus_tree.py -i $full_proc_dir/beta_diversity/weighted_unifrac/rare_upgma/ -o $full_proc_dir/beta_diversity/weighted_unifrac/rare_upgma/consensus.tre`; 
+
+# Tree compare (weighted_unifrac) command 
+`tree_compare.py -s $full_proc_dir/beta_diversity/weighted_unifrac/rare_upgma/ -m $full_proc_dir/beta_diversity/weighted_unifrac/rare_upgma/consensus.tre -o $full_proc_dir/beta_diversity/weighted_unifrac/upgma_cmp/`; 
+
+# Principal coordinates (weighted_unifrac) command 
+`principal_coordinates.py -i $full_proc_dir/beta_diversity/weighted_unifrac/rare_dm/ -o $full_proc_dir/beta_diversity/weighted_unifrac/pcoa/`; 
+
+# 2d plots (weighted_unifrac) command 
+#`make_2d_plots.py -i $full_proc_dir/beta_diversity/weighted_unifrac/pcoa/ -o $full_proc_dir/beta_diversity/weighted_unifrac/2d_plots/ -m $global_working_dir/QA/qiime_mapping.txt`;
+
+# 3d plots (weighted_unifrac) command 
+#/software/python-2.6.4-release/bin/python /software/qiime-1.2.1-release/bin/make_3d_plots.py -i AllLungBetaJack/weighted_unifrac//pcoa/ -o AllLungBetaJack/weighted_unifrac//3d_plots/ -m barcodemapping.txt 
+
+# Make PDF of Jackknife tree with labeled support: weighted unifrac command
+`make_bootstrapped_tree.py -m $full_proc_dir/beta_diversity/weighted_unifrac/upgma_cmp/master_tree.tre -s $full_proc_dir/beta_diversity/weighted_unifrac/upgma_cmp/jackknife_support.txt -o $full_res_dir/weighted_unifrac_betadiv_jackknife_tree.pdf`;
+
+# UPGMA on full distance matrix: unweighted_unifrac command 
+`upgma_cluster.py -i $full_proc_dir/beta_diversity/unweighted_unifrac_normalized_otu_table.txt -o $full_proc_dir/beta_diversity/unweighted_unifrac_normalized_otu_table_upgma.tre`;
+
+# Beta diversity on rarefied OTU tables (unweighted_unifrac) command 
+`beta_diversity.py -i $full_proc_dir/beta_diversity/rarefaction/ -o $full_proc_dir/beta_diversity/unweighted_unifrac/rare_dm/  -m unweighted_unifrac  -t $full_proc_dir/filtered/normalised.fa_rep_set_aligned_pfiltered.tre`;
+
+# UPGMA on rarefied distance matrix (unweighted_unifrac) command 
+`upgma_cluster.py -i $full_proc_dir/beta_diversity/unweighted_unifrac/rare_dm/ -o $full_proc_dir/beta_diversity/unweighted_unifrac/rare_upgma/`;
+
+# consensus on rarefied distance matrices (unweighted_unifrac) command 
+`consensus_tree.py -i $full_proc_dir/beta_diversity/unweighted_unifrac/rare_upgma/ -o $full_proc_dir/beta_diversity/unweighted_unifrac/rare_upgma/consensus.tre`;
+# Tree compare (unweighted_unifrac) command 
+`tree_compare.py -s $full_proc_dir/beta_diversity/unweighted_unifrac/rare_upgma/ -m $full_proc_dir/beta_diversity/unweighted_unifrac/rare_upgma/consensus.tre -o $full_proc_dir/beta_diversity/unweighted_unifrac/upgma_cmp/`;
+
+# Principal coordinates (unweighted_unifrac) command 
+`principal_coordinates.py -i $full_proc_dir/beta_diversity/unweighted_unifrac/rare_dm/ -o $full_proc_dir/beta_diversity/unweighted_unifrac/pcoa/`;
+# 2d plots (unweighted_unifrac) command 
+#/software/python-2.6.4-release/bin/python /software/qiime-1.2.1-release/bin/make_2d_plots.py -i AllLungBetaJack/unweighted_unifrac//pcoa/ -o AllLungBetaJack/unweighted_unifrac//2d_plots/ -m barcodemapping.txt 
+
+# 3d plots (unweighted_unifrac) command 
+#/software/python-2.6.4-release/bin/python /software/qiime-1.2.1-release/bin/make_3d_plots.py -i AllLungBetaJack/unweighted_unifrac//pcoa/ -o AllLungBetaJack/unweighted_unifrac//3d_plots/ -m barcodemapping.txt 
+
+# Make PDF of Jackknife tree with labeled support: unweighted unifrac command
+`make_bootstrapped_tree.py -m $full_proc_dir/beta_diversity/unweighted_unifrac/upgma_cmp/master_tree.tre -s $full_proc_dir/beta_diversity/unweighted_unifrac/upgma_cmp/jackknife_support.txt -o $full_res_dir/unweighted_unifrac_betadiv_jackknife_tree.pdf`;
+print "\nYour results are located in: $full_res_dir\n\n";
 
 
 print "\nYour results are located in: $full_res_dir\n\n";
