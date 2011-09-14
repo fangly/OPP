@@ -6,7 +6,8 @@ args<-commandArgs(trailingOnly = T);
 #args3 should be rowsidecolors
 HMold<-read.table(args[1],header=TRUE,sep="\t");
 x<-(dim(HMold)[2]-1);
-HM<-HMold[,x];
+y<-(dim(HMold)[1]);
+HM<-HMold[1:y,1:x];
 library(gplots);
 library(RColorBrewer);
 rowcols<-read.table(args[3],header=FALSE);
